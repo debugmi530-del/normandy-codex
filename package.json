@@ -1,0 +1,63 @@
+{
+  "name": "normandy-codex",
+  "version": "1.0.0",
+  "description": "Normandy Codex — offline AI assistant for Windows. Writes, studies, fixes code, and replies to text. Fully local inference, no cloud required.",
+  "main": "electron/main.js",
+  "type": "module",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -k -n VITE,ELECTRON -c blue,magenta \"vite\" \"npm:dev:electron\"",
+    "dev:electron": "wait-on tcp:5173 && cross-env NODE_ENV=development electron .",
+    "build:renderer": "vite build",
+    "build": "npm run build:renderer && electron-builder --win",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron-store": "^10.0.0",
+    "node-llama-cpp": "^3.6.0",
+    "systeminformation": "^5.23.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.2",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.normandycodex.app",
+    "productName": "Normandy Codex",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/*.node",
+      "node_modules/node-llama-cpp/**/*"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    }
+  }
+}
