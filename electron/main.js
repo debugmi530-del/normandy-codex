@@ -24,12 +24,29 @@ function createWindow() {
     minHeight: 640,
     backgroundColor: "#05070d",
     autoHideMenuBar: true,
+    // Hide until content is ready to avoid black-flash on startup
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
     },
+  });
+
+  // Maximize and show only when the renderer has finished painting
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.maximize();
+    mainWindow.show();
+  });
+
+  // Fallback: if content fails to load, show window anyway so user sees an error
+  mainWindow.webContents.on("did-fail-load", (_event, code, desc) => {
+    console.error(`Renderer failed to load: ${code} ${desc}`);
+    if (!mainWindow.isVisible()) {
+      mainWindow.maximize();
+      mainWindow.show();
+    }
   });
 
   if (isDev) {
