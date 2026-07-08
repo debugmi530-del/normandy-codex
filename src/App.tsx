@@ -44,15 +44,20 @@ export default function App() {
     };
   }, []);
 
+  const loadingHistoryRef = useRef(false);
+
   useEffect(() => {
+    loadingHistoryRef.current = true;
+    setMessages([]);
     (async () => {
       const history = await window.codex.history.get(activeProfileId);
       setMessages(history);
+      loadingHistoryRef.current = false;
     })();
   }, [activeProfileId]);
 
   useEffect(() => {
-    if (!modelReady) return;
+    if (!modelReady || loadingHistoryRef.current) return;
     window.codex.history.save(activeProfileId, messages);
   }, [messages, activeProfileId, modelReady]);
 

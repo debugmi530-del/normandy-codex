@@ -273,8 +273,13 @@ export class ModelManager {
       if (fs.existsSync(p)) fs.unlinkSync(p);
     }
     if (this.currentModelId === modelId) {
-      this.currentModelId = null;
+      await this.session?.dispose?.();
+      await this.context?.dispose?.();
+      await this.model?.dispose?.();
       this.session = null;
+      this.context = null;
+      this.model = null;
+      this.currentModelId = null;
     }
     return true;
   }

@@ -75,6 +75,8 @@ ipcMain.handle("chat:send", (_event, { message, attachments }) => {
       mainWindow?.webContents.send("chat:done", { streamId, full });
     })
     .catch((error) => {
+      // Silently ignore deliberate user aborts — no error message in chat
+      if (error?.name === "AbortError" || error?.code === "ERR_ABORTED") return;
       mainWindow?.webContents.send("chat:error", {
         streamId,
         message: String(error?.message || error),
@@ -170,8 +172,12 @@ ipcMain.handle("files:openFolderDialog", async () => {
 
 ipcMain.handle("files:readDropped", (_event, filePaths) =>
   filePaths.map((p) => {
-    const stat = fs.statSync(p);
-    return stat.isDirectory() ? readFolderEntry(p) : readFileEntry(p);
+    try {
+      const stat = fs.statSync(p);
+      return stat.isDirectory() ? readFolderEntry(p) : readFileEntry(p);
+    } catch (error) {
+      return { path: p, name: path.basename(p), type: "file", error: String(error?.message || error) };
+    }
   })
 );
 
